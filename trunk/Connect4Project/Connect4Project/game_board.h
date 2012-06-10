@@ -6,7 +6,7 @@
 class TBoard
 {
 private:
-    TCell cellsList[6][7];
+    TCell* cellsList[6][7];
     bool playerRed;    
 	bool insertAt(int row, int col, int color);
 	int checkEmptyPosition(int col);
@@ -17,7 +17,7 @@ private:
 	
 public:
     TBoard();
-    ~TBoard(){}
+    ~TBoard();
 
     bool checkForWin();
     bool isFull();

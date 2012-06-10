@@ -6,22 +6,42 @@ TBoard::TBoard()
 {
 	for(int i = 0; i < 6; ++i)
 	{
+		for(int j = 0; j < 7; ++j)
+		{
+			cellsList[i][j] = new TCell;
+		}
+	}	
+
+	for(int i = 0; i < 6; ++i)
+	{
 	    for(int j = 0; j < 7; ++j)
 		{
 		    // initialize all cells
-		    cellsList[i][j].goEmpty();
+		    cellsList[i][j]->goEmpty();
 		}
 	}
 
 	playerRed = true;
 }	
 
+TBoard::~TBoard()
+{
+	for(int i = 0; i < 6; ++i)
+	{
+		for(int j = 0; j < 7; ++j)
+		{
+			delete cellsList[i][j];
+			cellsList[i][j] = (TCell*)0;
+		}
+	}	
+}
+
 // returns -1 if full
 int TBoard::checkEmptyPosition(int col)
 {
     for(int i = 5; i > -1; --i)
 	{
-	    if(cellsList[i][col].isEmpty())
+	    if(cellsList[i][col]->isEmpty())
 		{
 		    return i;
 		}
@@ -51,11 +71,11 @@ void TBoard::insertAtColumn(int col, int color)
 		{
 		    if(1 == color)  // suppose 1 = Red, 2 = Blue
 			{
-		        cellsList[i][col].goRed();
+		        cellsList[i][col]->goRed();
 			}
 			else
 			{
-			    cellsList[i][col].goBlue();
+			    cellsList[i][col]->goBlue();
 			}
 		}
 		else if(isFull())
@@ -109,11 +129,11 @@ bool TBoard::checkForDiagonalWin()
 
 void TBoard::currentBoardState(int board[6][7])
 {
-	for(int i = 0; i < 5; ++i)
+	for(int i = 0; i < 6; ++i)
 	{
-		for(int j = 0; j < 6; ++j)
+		for(int j = 0; j < 7; ++j)
 		{
-			board[i][j] = cellsList[i][j].getColor();
+			board[i][j] = cellsList[i][j]->getColor();
 		}
 	}
 }

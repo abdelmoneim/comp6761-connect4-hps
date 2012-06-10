@@ -8,8 +8,8 @@ using namespace std;
 
 TCell::TCell()
 {	
-    currentState = new TState;
-	empty = false;	
+    currentState = new TEmpty;
+	empty = true;	
 }
 
 TCell::~TCell()
