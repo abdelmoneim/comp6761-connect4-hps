@@ -77,6 +77,8 @@ void TBoard::insertAtColumn(int col, int color)
 			{
 			    cellsList[i][col]->goBlue();
 			}
+			// done turn, switch player
+			switchPlayer();
 		}
 		else if(isFull())
 		{
