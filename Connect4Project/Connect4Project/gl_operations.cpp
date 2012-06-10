@@ -181,7 +181,8 @@ void GLOperations::idleFuncSetup()
 {
 	currentInstance = this;
 	currentBoard = theGameBoard;
-	glutIdleFunc(GLOperations::s_idleFunc);
+//	glutIdleFunc(GLOperations::s_idleFunc);
+	glutIdleFunc(GLOperations::s_renderFunc);
 }
 
 void GLOperations::enterMainLoop()
@@ -337,14 +338,39 @@ void GLOperations::s_drawBoard()
 		glCallList(s_disksList);
 	glPopMatrix();
 	*/
-	double r = 2.5;
+	int colors[6][7]; 
+	currentBoard->currentBoardState(colors);
+
+	double rad = 2.5;
 	for(int i = 1; i < 7 ; ++i)
 	{
 		for(int j = 1; j < 8; ++j)
 		{
+	        int color = colors[i-1][j-1];	
+			double r;
+			double g;
+			double b;
+			if(0 == color)
+			{
+				r = 0.1;
+				g = 0.1;
+				b = 0.1;
+			}
+			else if(1 == color)
+			{
+				r = 1.0;
+				g = 0.0;
+				b = 0.0;
+			}
+			else
+			{
+				r = 0.0;
+				g = 0.0;
+				b = 1.0;
+			}
 			glPushMatrix();
-                glColor3f(1.0, 0.0, 0.0);
-	        	glTranslatef(2*i*r, 2*j*r, -8.0);
+                glColor3f(r, g, b);
+	        	glTranslatef(2*i*rad, 2*j*rad, -8.0);
 	//	gluSphere(s_qobj, 10.0, 32, 32);
 	        	gluDisk(s_qobj, 0.0, 2.5, 32, 16);
 	        glPopMatrix();
@@ -379,10 +405,11 @@ void GLOperations::s_mouseFunc(int button, int state, int x, int y)
 
 void GLOperations::s_timerFunc(int value)
 {
-
+	glutPostRedisplay();
+	glutTimerFunc(24, s_timerFunc, 1);
 }
 
 void GLOperations::s_idleFunc()
 {
-
+	glutPostRedisplay();
 }
