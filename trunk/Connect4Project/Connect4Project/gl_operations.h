@@ -2,13 +2,20 @@
 #define GL_OPERATIONS_H
 
 #include <vector>
+#include <gl\freeglut.h>
 
 class TBoard;
+//class GLUquadricObj;
 
 class GLOperations
 {
 	static GLOperations* currentInstance;
 	static TBoard* currentBoard;
+	static std::vector<void*> quadricsList;
+	static GLUquadricObj* s_qobj;
+	// display lists for the disks that will represent the coins
+	static GLuint s_disksList;
+
 	// viewport boundaries
 	static int XMIN;
 	static int XMAX;
@@ -27,9 +34,12 @@ class GLOperations
 	static void s_timerFunc(int value);
 	static void s_idleFunc();
 
-	static void s_drawBoard();
+	static void s_drawBoard();	
 
 	TBoard* theGameBoard;
+	// the dynamic one
+	GLuint disksList;
+	GLUquadricObj* qobj;
 
 public:
 	explicit GLOperations(int xXMIN = 0, int xXMAX = 1, int yYMIN = 0, int yYMAX = 1);

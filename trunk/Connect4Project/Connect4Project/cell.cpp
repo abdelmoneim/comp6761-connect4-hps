@@ -8,7 +8,7 @@ using namespace std;
 
 TCell::TCell()
 {	
-    currentState = (TState*)0;
+    currentState = new TState;
 	empty = false;	
 }
 
