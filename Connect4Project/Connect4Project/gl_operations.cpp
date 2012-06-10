@@ -9,6 +9,9 @@
 // initializing static data members
 GLOperations* GLOperations::currentInstance = static_cast<GLOperations*>( 0 );
 TBoard* GLOperations::currentBoard = static_cast<TBoard*>( 0 ); 
+std::vector<void*> GLOperations::quadricsList;
+GLUquadricObj* GLOperations::s_qobj = (GLUquadricObj*)0;
+GLuint GLOperations::s_disksList = (GLuint)0;
 
 int GLOperations::XMIN = 0;
 int GLOperations::XMAX = 1;
@@ -23,6 +26,19 @@ GLOperations::GLOperations(int xXMIN, int xXMAX, int yYMIN, int yYMAX)
 	YMAX = yYMAX;
 
 	theGameBoard = new TBoard;
+	
+	disksList = glGenLists(3);
+	
+	qobj = gluNewQuadric();
+	gluQuadricDrawStyle(qobj, GLU_FILL);
+	gluQuadricNormals(qobj, GLU_SMOOTH);
+	s_qobj = qobj;
+//	glNewList(disksList, GL_COMPILE);
+	  //  gluDisk(qobj, 0.0, 2.5, 32, 16);
+	    //gluSphere(qobj, 10.0, 32, 32);
+//	glEndList();
+	s_disksList = disksList;
+
 }
 
 GLOperations::~GLOperations()
@@ -38,6 +54,8 @@ GLOperations::~GLOperations()
 		delete theGameBoard;
 		theGameBoard = NULL;
 	}
+
+	gluDeleteQuadric(qobj);
 }
 
 void GLOperations::init(double minX, double maxX, double minY, double maxY)
@@ -65,7 +83,7 @@ void GLOperations::initGLUT(int argc, char* argv[])
 	// initialization of winidow size, position, color format and animation support
     glutInitWindowSize(800, 600);
     glutInitWindowPosition ( 140, 140 );
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
     glutInit(&argc, argv);	
 	char* window_title = "COMP 6761 Connect4";
     int lab1_window = glutCreateWindow( window_title );		
@@ -85,7 +103,7 @@ void GLOperations::initLighting()
 	GLfloat specular[]     = { 1.0, 1.0, 1.0, 1.0 };
 	GLfloat specref[]      = { 1.0, 1.0, 1.0, 1.0 };
 	// initial light position
-	GLfloat position[]     = { -50.0, 50.0, 100.0, 1.0 };
+	GLfloat position[]     = { -20.0, 20.0, 1.0, 1.0 };
 	// hidden surface removal
 	glEnable(GL_DEPTH_TEST);
 	// which is the front face, counter-clockwise in this case
@@ -101,6 +119,8 @@ void GLOperations::initLighting()
 	glLightfv(GL_LIGHT0, GL_POSITION, position);
 	glEnable(GL_LIGHT0);
 	
+	glShadeModel(GL_SMOOTH);
+
 	// enable color tracking
 	glEnable(GL_COLOR_MATERIAL);
 
@@ -192,16 +212,18 @@ void GLOperations::s_renderFunc()
 	// setting the clear color to be white
 //	glClearColor(1.0, 1.0, 1.0, 1.0);
 	// ckear the color buffer
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// prepare the model view
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	glTranslatef(-16.0, -10.0, -100.0);
 
 	s_drawBoard();
 
 	// let OpenGL executes the commands
 	glFlush();	
 
+	glutSwapBuffers();
 }
 
 void GLOperations::s_keyboardFunc(unsigned char key, int x, int y)
@@ -266,7 +288,68 @@ void GLOperations::s_keyboardFunc(unsigned char key, int x, int y)
 
 void GLOperations::s_drawBoard()
 {
+	
+	glColor3f(0.8, 0.8, 0.8);
+	
+	glBegin(GL_QUADS);
+	    // polygon 0, 1, 2, 3
+	    glVertex3f( 0.0,  0.0, -50.0);
+		glVertex3f(35.0,  0.0, -50.0);
+		glVertex3f(35.0, 30.0, -50.0);
+		glVertex3f( 0.0, 30.0, -50.0);
+		// polygon 4, 5, 6, 7
+		glVertex3f( 0.0,  0.0, -60.0);
+		glVertex3f( 0.0, 30.0, -60.0);
+		glVertex3f(35.0, 30.0, -60.0);
+		glVertex3f(35.0,  0.0, -60.0);
+		// polygon 1, 7, 6, 2
+		glVertex3f(35.0,  0.0, -50.0);
+		glVertex3f(35.0,  0.0, -60.0);
+		glVertex3f(35.0, 30.0, -60.0);
+		glVertex3f(35.0, 30.0, -50.0);
+		// polygon 3, 2, 6, 5
+		glVertex3f( 0.0, 30.0, -50.0);
+		glVertex3f(35.0, 30.0, -50.0);
+		glVertex3f(35.0, 30.0, -60.0);
+		glVertex3f( 0.0, 30.0, -60.0);
+		// polygon 0, 4, 7, 1
+		glVertex3f( 0.0, 0.0, -50.0);
+		glVertex3f( 0.0, 0.0, -60.0);
+		glVertex3f(35.0, 0.0, -60.0);
+		glVertex3f(35.0, 0.0, -50.0);
+		// polygon 0, 3, 5, 4
+		glVertex3f(0.0,  0.0, -50.0);
+		glVertex3f(0.0, 30.0, -50.0);
+		glVertex3f(0.0, 30.0, -60.0);
+		glVertex3f(0.0,  0.0, -60.0);
+	glEnd();
+	
+	/*
+	glPushMatrix();
+	    glColor3f(1.0, 0.0, 0.0);
+	    glTranslatef(14.0, 8.0, -15.0);
+		glCallList(s_disksList);
+	glPopMatrix();
+	*/
 
+	glPushMatrix();
+        glColor3f(1.0, 0.0, 0.0);
+		glTranslatef(0.0, 0.0, -50.0);
+	//	gluSphere(s_qobj, 10.0, 32, 32);
+		gluDisk(s_qobj, 0.0, 2.5, 32, 16);
+	glPopMatrix();
+
+	glPushMatrix();
+        glColor3f(0.0, 0.0, 1.0);
+		glTranslatef(5.0, 0.0, -50.0);
+	//	gluSphere(s_qobj, 10.0, 32, 32);
+		gluDisk(s_qobj, 0.0, 2.5, 32, 16);
+	glPopMatrix();
+
+	glPushMatrix();
+	    glColor3f(0.0, 1.0, 0.0);
+	    glutSolidCube(5.0);
+	glPopMatrix();
 }
 
 void GLOperations::s_mouseFunc(int button, int state, int x, int y)
