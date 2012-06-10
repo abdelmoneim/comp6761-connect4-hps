@@ -13,6 +13,10 @@ std::vector<void*> GLOperations::quadricsList;
 GLUquadricObj* GLOperations::s_qobj = (GLUquadricObj*)0;
 GLuint GLOperations::s_disksList = (GLuint)0;
 
+// thikness of the board
+const double minZ = -10;
+const double maxZ = -20;
+
 int GLOperations::XMIN = 0;
 int GLOperations::XMAX = 1;
 int GLOperations::YMIN = 0;
@@ -70,7 +74,8 @@ void GLOperations::init(double minX, double maxX, double minY, double maxY)
 	// setup the viewing volume in 3D
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();		
-	gluPerspective(60.0, (maxX - minX)/(maxY-minY), 1.0, 200.0);
+	glOrtho(-60.0, 60.0, -50.0, 50.0, 1, 200);
+	//gluPerspective(60.0, (maxX - minX)/(maxY-minY), 1.0, 200.0);
 
 	// prepare the model view
 	glMatrixMode(GL_MODELVIEW);
@@ -198,8 +203,9 @@ void GLOperations::s_reshapeFunc(int w, int h)
 	// reset the viewing volume
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	glOrtho(-60.0, 60.0, -50.0, 50.0, 1, 200);
 	// setup perspective projection
-    gluPerspective(60.0, w/h, 1.0, 200.0);
+    //gluPerspective(60.0, w/h, 1.0, 200.0);
 	// finally reset the model view
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();                 
@@ -293,35 +299,35 @@ void GLOperations::s_drawBoard()
 	
 	glBegin(GL_QUADS);
 	    // polygon 0, 1, 2, 3
-	    glVertex3f( 0.0,  0.0, -50.0);
-		glVertex3f(35.0,  0.0, -50.0);
-		glVertex3f(35.0, 30.0, -50.0);
-		glVertex3f( 0.0, 30.0, -50.0);
+	    glVertex3f( 0.0,  0.0, minZ);
+		glVertex3f(35.0,  0.0, minZ);
+		glVertex3f(35.0, 30.0, minZ);
+		glVertex3f( 0.0, 30.0, minZ);
 		// polygon 4, 5, 6, 7
-		glVertex3f( 0.0,  0.0, -60.0);
-		glVertex3f( 0.0, 30.0, -60.0);
-		glVertex3f(35.0, 30.0, -60.0);
-		glVertex3f(35.0,  0.0, -60.0);
+		glVertex3f( 0.0,  0.0, maxZ);
+		glVertex3f( 0.0, 30.0, maxZ);
+		glVertex3f(35.0, 30.0, maxZ);
+		glVertex3f(35.0,  0.0, maxZ);
 		// polygon 1, 7, 6, 2
-		glVertex3f(35.0,  0.0, -50.0);
-		glVertex3f(35.0,  0.0, -60.0);
-		glVertex3f(35.0, 30.0, -60.0);
-		glVertex3f(35.0, 30.0, -50.0);
+		glVertex3f(35.0,  0.0, minZ);
+		glVertex3f(35.0,  0.0, maxZ);
+		glVertex3f(35.0, 30.0, maxZ);
+		glVertex3f(35.0, 30.0, minZ);
 		// polygon 3, 2, 6, 5
-		glVertex3f( 0.0, 30.0, -50.0);
-		glVertex3f(35.0, 30.0, -50.0);
-		glVertex3f(35.0, 30.0, -60.0);
-		glVertex3f( 0.0, 30.0, -60.0);
+		glVertex3f( 0.0, 30.0, minZ);
+		glVertex3f(35.0, 30.0, minZ);
+		glVertex3f(35.0, 30.0, maxZ);
+		glVertex3f( 0.0, 30.0, maxZ);
 		// polygon 0, 4, 7, 1
-		glVertex3f( 0.0, 0.0, -50.0);
-		glVertex3f( 0.0, 0.0, -60.0);
-		glVertex3f(35.0, 0.0, -60.0);
-		glVertex3f(35.0, 0.0, -50.0);
+		glVertex3f( 0.0, 0.0, minZ);
+		glVertex3f( 0.0, 0.0, maxZ);
+		glVertex3f(35.0, 0.0, maxZ);
+		glVertex3f(35.0, 0.0, minZ);
 		// polygon 0, 3, 5, 4
-		glVertex3f(0.0,  0.0, -50.0);
-		glVertex3f(0.0, 30.0, -50.0);
-		glVertex3f(0.0, 30.0, -60.0);
-		glVertex3f(0.0,  0.0, -60.0);
+		glVertex3f(0.0,  0.0, minZ);
+		glVertex3f(0.0, 30.0, minZ);
+		glVertex3f(0.0, 30.0, maxZ);
+		glVertex3f(0.0,  0.0, maxZ);
 	glEnd();
 	
 	/*
@@ -331,25 +337,39 @@ void GLOperations::s_drawBoard()
 		glCallList(s_disksList);
 	glPopMatrix();
 	*/
-
+	double r = 2.5;
+	for(int i = 1; i < 7 ; ++i)
+	{
+		for(int j = 1; j < 8; ++j)
+		{
+			glPushMatrix();
+                glColor3f(1.0, 0.0, 0.0);
+	        	glTranslatef(2*i*r, 2*j*r, -8.0);
+	//	gluSphere(s_qobj, 10.0, 32, 32);
+	        	gluDisk(s_qobj, 0.0, 2.5, 32, 16);
+	        glPopMatrix();
+		}
+	}
+	/*
 	glPushMatrix();
         glColor3f(1.0, 0.0, 0.0);
-		glTranslatef(0.0, 0.0, -50.0);
+		glTranslatef(0.0, 0.0, -8.0);
 	//	gluSphere(s_qobj, 10.0, 32, 32);
 		gluDisk(s_qobj, 0.0, 2.5, 32, 16);
 	glPopMatrix();
 
 	glPushMatrix();
         glColor3f(0.0, 0.0, 1.0);
-		glTranslatef(5.0, 0.0, -50.0);
+		glTranslatef(5.0, 0.0, -8.0);
 	//	gluSphere(s_qobj, 10.0, 32, 32);
 		gluDisk(s_qobj, 0.0, 2.5, 32, 16);
 	glPopMatrix();
-
+	
 	glPushMatrix();
 	    glColor3f(0.0, 1.0, 0.0);
 	    glutSolidCube(5.0);
 	glPopMatrix();
+	*/ 
 }
 
 void GLOperations::s_mouseFunc(int button, int state, int x, int y)
