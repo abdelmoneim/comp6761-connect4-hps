@@ -15,12 +15,20 @@ GLuint GLOperations::s_disksList = (GLuint)0;
 
 // thikness of the board
 const double minZ = -10;
-const double maxZ = -20;
+const double maxZ = -14;
 
 int GLOperations::XMIN = 0;
 int GLOperations::XMAX = 1;
 int GLOperations::YMIN = 0;
 int GLOperations::YMAX = 1;
+
+int GLOperations::previousX = 0;
+int GLOperations::previousY = 0;
+
+double GLOperations::max_x_view = 0.0;
+double GLOperations::min_x_view = 0.0;
+double GLOperations::max_y_view = 0.0;
+double GLOperations::min_y_view = 0.0;
 
 GLOperations::GLOperations(int xXMIN, int xXMAX, int yYMIN, int yYMAX)
 {
@@ -64,29 +72,30 @@ GLOperations::~GLOperations()
 
 void GLOperations::init(double minX, double maxX, double minY, double maxY)
 {		
-	XMIN = static_cast<int>(minX);
-	XMAX = static_cast<int>(maxX);
-	YMIN = static_cast<int>(minY);
-	YMAX = static_cast<int>(maxY);
+//	XMIN = static_cast<int>(minX);
+//	XMAX = static_cast<int>(maxX);
+//	YMIN = static_cast<int>(minY);
+//	YMAX = static_cast<int>(maxY);
 
 	// set the clear color to be white
 //	glClearColor(1.0, 1.0, 1.0, 1.0);
 	// setup the viewing volume in 3D
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();		
-	glOrtho(-60.0, 60.0, -50.0, 50.0, 1, 200);
+	glOrtho(minX, maxX, minY, maxY, 1, 100);
 	//gluPerspective(60.0, (maxX - minX)/(maxY-minY), 1.0, 200.0);
 
 	// prepare the model view
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	gluLookAt(0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0);
 }
 
 
 void GLOperations::initGLUT(int argc, char* argv[])
 {
 	// initialization of winidow size, position, color format and animation support
-    glutInitWindowSize(800, 600);
+    glutInitWindowSize(XMAX-XMIN, YMAX-YMIN);
     glutInitWindowPosition ( 140, 140 );
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
     glutInit(&argc, argv);	
@@ -108,7 +117,7 @@ void GLOperations::initLighting()
 	GLfloat specular[]     = { 1.0, 1.0, 1.0, 1.0 };
 	GLfloat specref[]      = { 1.0, 1.0, 1.0, 1.0 };
 	// initial light position
-	GLfloat position[]     = { -20.0, 20.0, 1.0, 1.0 };
+	GLfloat position[]     = { -20.0, 20.0, 10.0, 1.0 };
 	// hidden surface removal
 	glEnable(GL_DEPTH_TEST);
 	// which is the front face, counter-clockwise in this case
@@ -204,12 +213,13 @@ void GLOperations::s_reshapeFunc(int w, int h)
 	// reset the viewing volume
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-60.0, 60.0, -50.0, 50.0, 1, 200);
+	glOrtho(-20.0, 20.0, -20.0, 20.0, 1, 100);
 	// setup perspective projection
     //gluPerspective(60.0, w/h, 1.0, 200.0);
 	// finally reset the model view
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();                 
+	glLoadIdentity(); 
+	gluLookAt(0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 1.0, 0.0);
 }
 
 void GLOperations::s_renderFunc()
@@ -223,14 +233,112 @@ void GLOperations::s_renderFunc()
 	// prepare the model view
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glTranslatef(-16.0, -10.0, -100.0);
-
+	glTranslatef(18.0, 14.0, -50.0);
+	glRotatef(180, 0.0, 0.0, 1.0);
 	s_drawBoard();
 
 	// let OpenGL executes the commands
 	glFlush();	
 
 	glutSwapBuffers();
+}
+
+void GLOperations::s_drawBoard()
+{
+	
+	glColor3f(0.8, 0.8, 0.8);
+//	glPushMatrix();
+	glBegin(GL_QUADS);
+	    // polygon 0, 1, 2, 3
+	    glVertex3f( 0.0,  0.0, minZ);
+		glVertex3f(35.0,  0.0, minZ);
+		glVertex3f(35.0, 30.0, minZ);
+		glVertex3f( 0.0, 30.0, minZ);
+		// polygon 4, 5, 6, 7
+		glVertex3f( 0.0,  0.0, maxZ);
+		glVertex3f( 0.0, 30.0, maxZ);
+		glVertex3f(35.0, 30.0, maxZ);
+		glVertex3f(35.0,  0.0, maxZ);
+		// polygon 1, 7, 6, 2
+		glVertex3f(35.0,  0.0, minZ);
+		glVertex3f(35.0,  0.0, maxZ);
+		glVertex3f(35.0, 30.0, maxZ);
+		glVertex3f(35.0, 30.0, minZ);
+		// polygon 3, 2, 6, 5
+		glVertex3f( 0.0, 30.0, minZ);
+		glVertex3f(35.0, 30.0, minZ);
+		glVertex3f(35.0, 30.0, maxZ);
+		glVertex3f( 0.0, 30.0, maxZ);
+		// polygon 0, 4, 7, 1
+		glVertex3f( 0.0, 0.0, minZ);
+		glVertex3f( 0.0, 0.0, maxZ);
+		glVertex3f(35.0, 0.0, maxZ);
+		glVertex3f(35.0, 0.0, minZ);
+		// polygon 0, 3, 5, 4
+		glVertex3f(0.0,  0.0, minZ);
+		glVertex3f(0.0, 30.0, minZ);
+		glVertex3f(0.0, 30.0, maxZ);
+		glVertex3f(0.0,  0.0, maxZ);
+	glEnd();
+
+	int colors[6][7]; 
+	currentBoard->currentBoardState(colors);
+
+	double rad = 2.5;
+	for(int i = 1; i < 7 ; ++i)
+	{
+		for(int j = 1; j < 8; ++j)
+		{
+	        int color = colors[i-1][j-1];	
+			double r;
+			double g;
+			double b;
+			if(0 == color)
+			{
+				r = 0.1;
+				g = 0.1;
+				b = 0.1;
+			}
+			else if(1 == color)
+			{
+				r = 1.0;
+				g = 0.0;
+				b = 0.0;
+			}
+			else
+			{
+				r = 0.0;
+				g = 0.0;
+				b = 1.0;
+			}
+			
+			glPushMatrix();
+                glColor3f(r, g, b);								
+	        	glTranslatef((2*j-1)*rad, (2*i-1)*rad, -8.0);
+	            gluSphere(s_qobj, 2.5, 32, 32);	       
+	        glPopMatrix();
+		}
+	}
+	/*
+	glPushMatrix();
+        glColor3f(1.0, 0.0, 0.0);
+		glTranslatef(0.0, 0.0, -8.0);
+	//	gluSphere(s_qobj, 10.0, 32, 32);
+		gluDisk(s_qobj, 0.0, 2.5, 32, 16);
+	glPopMatrix();
+
+	glPushMatrix();
+        glColor3f(0.0, 0.0, 1.0);
+		glTranslatef(5.0, 0.0, -8.0);
+	//	gluSphere(s_qobj, 10.0, 32, 32);
+		gluDisk(s_qobj, 0.0, 2.5, 32, 16);
+	glPopMatrix();
+	
+	glPushMatrix();
+	    glColor3f(0.0, 1.0, 0.0);
+	    glutSolidCube(5.0);
+	glPopMatrix();
+	*/ 
 }
 
 void GLOperations::s_keyboardFunc(unsigned char key, int x, int y)
@@ -293,114 +401,20 @@ void GLOperations::s_keyboardFunc(unsigned char key, int x, int y)
 	glutPostRedisplay();
 }
 
-void GLOperations::s_drawBoard()
-{
-	
-	glColor3f(0.8, 0.8, 0.8);
-	
-	glBegin(GL_QUADS);
-	    // polygon 0, 1, 2, 3
-	    glVertex3f( 0.0,  0.0, minZ);
-		glVertex3f(35.0,  0.0, minZ);
-		glVertex3f(35.0, 30.0, minZ);
-		glVertex3f( 0.0, 30.0, minZ);
-		// polygon 4, 5, 6, 7
-		glVertex3f( 0.0,  0.0, maxZ);
-		glVertex3f( 0.0, 30.0, maxZ);
-		glVertex3f(35.0, 30.0, maxZ);
-		glVertex3f(35.0,  0.0, maxZ);
-		// polygon 1, 7, 6, 2
-		glVertex3f(35.0,  0.0, minZ);
-		glVertex3f(35.0,  0.0, maxZ);
-		glVertex3f(35.0, 30.0, maxZ);
-		glVertex3f(35.0, 30.0, minZ);
-		// polygon 3, 2, 6, 5
-		glVertex3f( 0.0, 30.0, minZ);
-		glVertex3f(35.0, 30.0, minZ);
-		glVertex3f(35.0, 30.0, maxZ);
-		glVertex3f( 0.0, 30.0, maxZ);
-		// polygon 0, 4, 7, 1
-		glVertex3f( 0.0, 0.0, minZ);
-		glVertex3f( 0.0, 0.0, maxZ);
-		glVertex3f(35.0, 0.0, maxZ);
-		glVertex3f(35.0, 0.0, minZ);
-		// polygon 0, 3, 5, 4
-		glVertex3f(0.0,  0.0, minZ);
-		glVertex3f(0.0, 30.0, minZ);
-		glVertex3f(0.0, 30.0, maxZ);
-		glVertex3f(0.0,  0.0, maxZ);
-	glEnd();
-	
-	/*
-	glPushMatrix();
-	    glColor3f(1.0, 0.0, 0.0);
-	    glTranslatef(14.0, 8.0, -15.0);
-		glCallList(s_disksList);
-	glPopMatrix();
-	*/
-	int colors[6][7]; 
-	currentBoard->currentBoardState(colors);
-
-	double rad = 2.5;
-	for(int i = 1; i < 7 ; ++i)
-	{
-		for(int j = 1; j < 8; ++j)
-		{
-	        int color = colors[i-1][j-1];	
-			double r;
-			double g;
-			double b;
-			if(0 == color)
-			{
-				r = 0.1;
-				g = 0.1;
-				b = 0.1;
-			}
-			else if(1 == color)
-			{
-				r = 1.0;
-				g = 0.0;
-				b = 0.0;
-			}
-			else
-			{
-				r = 0.0;
-				g = 0.0;
-				b = 1.0;
-			}
-			glPushMatrix();
-                glColor3f(r, g, b);
-	        	glTranslatef(2*i*rad, 2*j*rad, -8.0);
-	            gluSphere(s_qobj, 2.5, 32, 32);
-	        //	gluDisk(s_qobj, 0.0, 2.5, 32, 16);
-	        glPopMatrix();
-		}
-	}
-	/*
-	glPushMatrix();
-        glColor3f(1.0, 0.0, 0.0);
-		glTranslatef(0.0, 0.0, -8.0);
-	//	gluSphere(s_qobj, 10.0, 32, 32);
-		gluDisk(s_qobj, 0.0, 2.5, 32, 16);
-	glPopMatrix();
-
-	glPushMatrix();
-        glColor3f(0.0, 0.0, 1.0);
-		glTranslatef(5.0, 0.0, -8.0);
-	//	gluSphere(s_qobj, 10.0, 32, 32);
-		gluDisk(s_qobj, 0.0, 2.5, 32, 16);
-	glPopMatrix();
-	
-	glPushMatrix();
-	    glColor3f(0.0, 1.0, 0.0);
-	    glutSolidCube(5.0);
-	glPopMatrix();
-	*/ 
-}
-
 void GLOperations::s_mouseFunc(int button, int state, int x, int y)
 {
+	previousX = x;
+	previousY = y;
+	double w = double(x)/(XMAX-XMIN);
+	double h = double(y)/(YMAX-YMIN);
+	
+	double newLightX = (max_x_view - min_x_view)*w;
+	double newLightY = (max_y_view - min_y_view)*h;
+	
+	const GLfloat position[] = { newLightX, newLightY, 10.0, 1.0 };
 
+	glLightfv(GL_LIGHT0, GL_POSITION, position); 
+	
 }
 
 void GLOperations::s_timerFunc(int value)
@@ -411,5 +425,24 @@ void GLOperations::s_timerFunc(int value)
 
 void GLOperations::s_idleFunc()
 {
+	if(currentBoard->checkForWin())
+	{
+		glRasterPos2i(100, 120);
+        glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+		
+		std::string winner;
+		const unsigned char red[] = "Red has won";
+		const unsigned char blue[] = "Blue has won";
+
+		if(currentBoard->isWinnerRed())
+		{
+			glutBitmapString(GLUT_BITMAP_HELVETICA_18, red);
+		}
+		else
+		{
+			glutBitmapString(GLUT_BITMAP_HELVETICA_18, blue);			
+		}		        
+		
+	}
 	glutPostRedisplay();
 }
