@@ -371,8 +371,8 @@ void GLOperations::s_drawBoard()
 			glPushMatrix();
                 glColor3f(r, g, b);
 	        	glTranslatef(2*i*rad, 2*j*rad, -8.0);
-	//	gluSphere(s_qobj, 10.0, 32, 32);
-	        	gluDisk(s_qobj, 0.0, 2.5, 32, 16);
+	            gluSphere(s_qobj, 2.5, 32, 32);
+	        //	gluDisk(s_qobj, 0.0, 2.5, 32, 16);
 	        glPopMatrix();
 		}
 	}
