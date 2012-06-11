@@ -10,16 +10,16 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	// TApplication theApp;
-	GLOperations scene;
+	GLOperations gl_scene(0, 800, 0, 600);
 	try
 	{
 		// theApp.setActive(true);
 		// theApp.execute(argc, argv);
-		scene.initGLUT(argc, argv);
-		scene.init(0.0, 800.0, 0.0, 600.0);
-		scene.initLighting();
-		scene.initQuadrics();
-		scene.enterMainLoop();
+		gl_scene.initGLUT(argc, argv);
+		gl_scene.init(-20.0, 20.0, -20.0, 20.0);
+		gl_scene.initLighting();
+		gl_scene.initQuadrics();
+		gl_scene.enterMainLoop();
 	}
 	catch(exception& e)
 	{

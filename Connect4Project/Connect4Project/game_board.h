@@ -7,14 +7,15 @@ class TBoard
 {
 private:
     TCell* cellsList[6][7];
-    bool playerRed;    
+    bool playerRed;    	
 	bool insertAt(int row, int col, int color);
 	int checkEmptyPosition(int col);
 	
 	bool checkForRowWin();
 	bool checkForColumnWin();
 	bool checkForDiagonalWin();
-	
+	// true if red has won, otherwise the winner is blue 
+	bool winnerRed; 
 public:
     TBoard();
     ~TBoard();
@@ -27,6 +28,7 @@ public:
 	// player is either red or blue.
 	inline bool isPlayerRed() const { return playerRed; }
 	inline void switchPlayer() { playerRed = !playerRed; }
+	inline bool isWinnerRed() const { return winnerRed; }
 };
 
 

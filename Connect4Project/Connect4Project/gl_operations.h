@@ -22,6 +22,15 @@ class GLOperations
 	static int YMIN;
 	static int YMAX;
 
+	static double max_x_view;
+	static double min_x_view;
+	static double max_y_view;
+	static double min_y_view;
+
+	// mouse coordinates
+	static int previousX;
+	static int previousY;
+
 	// disallow
 	GLOperations(const GLOperations&);
 	GLOperations& operator=(const GLOperations&);

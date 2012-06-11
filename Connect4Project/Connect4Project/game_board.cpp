@@ -22,6 +22,7 @@ TBoard::TBoard()
 	}
 
 	playerRed = true;
+	winnerRed = false;
 }	
 
 TBoard::~TBoard()
@@ -111,9 +112,48 @@ bool TBoard::checkForRowWin()
 {
     for(int i = 0; i < 6; ++i)
 	{
-	    for(int j = 0; j < 5; ++j)
-		{
+		int colorCounter = 0;
+		int color = 0;
+		int previousColor = 0;
 
+	    for(int j = 0; j < 7; ++j)
+		{
+			if(cellsList[i][j]->isEmpty())
+			{
+				previousColor = 0;
+				colorCounter = 0;
+			}
+			else
+			{
+				color = cellsList[i][j]->getColor();
+				if(previousColor == 0)
+				{
+					previousColor = color;
+					++colorCounter;
+				}
+				else if(color != previousColor)
+				{
+					previousColor = 0;
+					colorCounter = 0;
+				}
+				else
+				{
+					++colorCounter;
+				}
+
+				if(4 == colorCounter)
+				{
+					if(1 == color)
+					{
+						winnerRed = true;
+					}
+					else
+					{
+						winnerRed = false;
+					}
+					return true;
+				}               
+			}
 		}
 	}
 	return false;
