@@ -12,6 +12,8 @@ TBoard* GLOperations::currentBoard = static_cast<TBoard*>( 0 );
 std::vector<void*> GLOperations::quadricsList;
 GLUquadricObj* GLOperations::s_qobj = (GLUquadricObj*)0;
 GLuint GLOperations::s_disksList = (GLuint)0;
+bool GLOperations::rotate_board = false;
+double GLOperations::y_rotate = 0.0;
 
 // thikness of the board
 const double minZ = -10;
@@ -80,9 +82,13 @@ void GLOperations::init(double minX, double maxX, double minY, double maxY)
 	// set the clear color to be white
 //	glClearColor(1.0, 1.0, 1.0, 1.0);
 	// setup the viewing volume in 3D
+	min_x_view = minX;
+	max_x_view = maxX;
+	min_y_view = minY;
+	max_y_view = maxY;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();		
-	glOrtho(minX, maxX, minY, maxY, 1, 100);
+	glOrtho(min_x_view, max_x_view, min_y_view, max_y_view, 1, 300);
 	//gluPerspective(60.0, (maxX - minX)/(maxY-minY), 1.0, 200.0);
 
 	// prepare the model view
@@ -213,7 +219,7 @@ void GLOperations::s_reshapeFunc(int w, int h)
 	// reset the viewing volume
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-20.0, 20.0, -20.0, 20.0, 1, 100);
+	glOrtho(min_x_view, max_x_view, min_y_view, max_y_view, 1, 300);
 	// setup perspective projection
     //gluPerspective(60.0, w/h, 1.0, 200.0);
 	// finally reset the model view
@@ -224,19 +230,36 @@ void GLOperations::s_reshapeFunc(int w, int h)
 
 void GLOperations::s_renderFunc()
 {
-	// GL render goes here 
+	// GL render goes here 	
 	
-	// setting the clear color to be white
-//	glClearColor(1.0, 1.0, 1.0, 1.0);
 	// ckear the color buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// prepare the model view
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	glLoadIdentity();			
+		
 	glTranslatef(18.0, 14.0, -50.0);
 	glRotatef(180, 0.0, 0.0, 1.0);
-	s_drawBoard();
 
+	if(rotate_board)
+	{	
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();	
+		glOrtho(2*min_x_view, 2*max_x_view, 2*min_y_view, 2*max_y_view, 1, 300);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glTranslatef(0.0, 0.0, -100.0);
+	    glRotatef(y_rotate, 1.0, 1.0, 1.0);			
+	}
+	else
+	{
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();	
+		glOrtho(min_x_view, max_x_view, min_y_view, max_y_view, 1, 300);
+		glMatrixMode(GL_MODELVIEW);
+	}
+	s_drawBoard();		
+	
 	// let OpenGL executes the commands
 	glFlush();	
 
@@ -244,10 +267,9 @@ void GLOperations::s_renderFunc()
 }
 
 void GLOperations::s_drawBoard()
-{
-	
+{	
 	glColor3f(0.8, 0.8, 0.8);
-//	glPushMatrix();
+
 	glBegin(GL_QUADS);
 	    // polygon 0, 1, 2, 3
 	    glVertex3f( 0.0,  0.0, minZ);
@@ -318,27 +340,7 @@ void GLOperations::s_drawBoard()
 	            gluSphere(s_qobj, 2.5, 32, 32);	       
 	        glPopMatrix();
 		}
-	}
-	/*
-	glPushMatrix();
-        glColor3f(1.0, 0.0, 0.0);
-		glTranslatef(0.0, 0.0, -8.0);
-	//	gluSphere(s_qobj, 10.0, 32, 32);
-		gluDisk(s_qobj, 0.0, 2.5, 32, 16);
-	glPopMatrix();
-
-	glPushMatrix();
-        glColor3f(0.0, 0.0, 1.0);
-		glTranslatef(5.0, 0.0, -8.0);
-	//	gluSphere(s_qobj, 10.0, 32, 32);
-		gluDisk(s_qobj, 0.0, 2.5, 32, 16);
-	glPopMatrix();
-	
-	glPushMatrix();
-	    glColor3f(0.0, 1.0, 0.0);
-	    glutSolidCube(5.0);
-	glPopMatrix();
-	*/ 
+	}	
 }
 
 void GLOperations::s_keyboardFunc(unsigned char key, int x, int y)
@@ -360,6 +362,10 @@ void GLOperations::s_keyboardFunc(unsigned char key, int x, int y)
 	switch(key)
 	{
 		// ATTENTION: our internal indexing is shifted back one position
+		// OMG, now I've noticed I could've done something like
+		// int column = atoi(key); if(column in range) { currentBoard->insertAtColumn(column, color); }
+		// I'm too tired to make changes now.
+		// Hadi Karesli.
 	case '1':
 		{			
 			currentBoard->insertAtColumn(0, color);
@@ -395,6 +401,9 @@ void GLOperations::s_keyboardFunc(unsigned char key, int x, int y)
 			currentBoard->insertAtColumn(6, color);
 		}
 		break;
+	case 'r':
+		rotate_board = !rotate_board;
+		break;
 	default: ;
 	}
 
@@ -419,6 +428,10 @@ void GLOperations::s_mouseFunc(int button, int state, int x, int y)
 
 void GLOperations::s_timerFunc(int value)
 {
+	if(rotate_board)
+	{
+	    y_rotate += 0.5;
+	}
 	glutPostRedisplay();
 	glutTimerFunc(24, s_timerFunc, 1);
 }

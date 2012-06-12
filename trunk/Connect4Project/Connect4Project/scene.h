@@ -9,6 +9,11 @@ class TCamera;
 class TLight;
 class GLOperations; 
 
+// this class should have become the major class, 
+// but I made a change in architecture to make every thing built around FreeGLUT
+// because I needed a game-loop mechanism and FreeGLUT has that, while otherwise 
+// I would have had to implement it myself. Which was impossible due to the narrow time interval.
+
 class TScene
 {
 private:
