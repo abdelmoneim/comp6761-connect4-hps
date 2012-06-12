@@ -31,6 +31,9 @@ class GLOperations
 	static int previousX;
 	static int previousY;
 
+	static bool rotate_board;
+	static double y_rotate;
+
 	// disallow
 	GLOperations(const GLOperations&);
 	GLOperations& operator=(const GLOperations&);

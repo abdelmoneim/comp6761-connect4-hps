@@ -1,9 +1,20 @@
+// COMP 6761, Summer 2012
+// Term Project, a Connect 4 game.
+// Name: Hadi Karesli, h_karesli@yahoo.com
+// Concordia Student ID: 9317201
+ 
+
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
 class TScene;
 // suggestion:
 // class TGamelogic;
+
+// This was supposed to be the main class in the application, 
+// which should have the game loop mechanism implemented inside.
+// But is ditched in favor of the use of FreeGLUT.
+// It's included here for completeness.
 
 // could be a singleton, we will think it later.
 class TApplication
