@@ -19,6 +19,10 @@ GLuint GLOperations::s_disksList = (GLuint)0;
 bool GLOperations::rotate_board = false;
 double GLOperations::y_rotate = 0.0;
 
+double GLOperations::lightX = 0.0;
+double GLOperations::lightY = 0.0;
+bool GLOperations::move_light = false;
+
 // thikness of the board
 const double minZ = -10;
 const double maxZ = -14;
@@ -244,7 +248,13 @@ void GLOperations::s_renderFunc()
 		
 	glTranslatef(18.0, 14.0, -50.0);
 	glRotatef(180, 0.0, 0.0, 1.0);
-
+	if(move_light)
+	{
+		glDisable(GL_LIGHT0);
+		GLfloat position[] = {lightX, lightY, 0.0};
+		glLightfv(GL_LIGHT0, GL_POSITION, position);
+		glEnable(GL_LIGHT0);
+	}
 	if(rotate_board)
 	{	
 		glMatrixMode(GL_PROJECTION);
@@ -408,6 +418,9 @@ void GLOperations::s_keyboardFunc(unsigned char key, int x, int y)
 	case 'r':
 		rotate_board = !rotate_board;
 		break;
+	case 'l':
+		move_light = !move_light;
+		break;
 	default: ;
 	}
 
@@ -416,6 +429,7 @@ void GLOperations::s_keyboardFunc(unsigned char key, int x, int y)
 
 void GLOperations::s_mouseFunc(int button, int state, int x, int y)
 {
+/*
 	previousX = x;
 	previousY = y;
 	double w = double(x)/(XMAX-XMIN);
@@ -427,14 +441,38 @@ void GLOperations::s_mouseFunc(int button, int state, int x, int y)
 	const GLfloat position[] = { newLightX, newLightY, 10.0, 1.0 };
 
 	glLightfv(GL_LIGHT0, GL_POSITION, position); 
-	
+	*/ 
 }
 
 void GLOperations::s_timerFunc(int value)
 {
+	srand(1);
+	int i = rand();
+	int j = rand();
+
 	if(rotate_board)
 	{
 	    y_rotate += 0.5;
+	}
+	if(move_light)
+	{		
+		if(lightX > 20.0 || lightX < -20.0)
+		{ 
+		    lightX = 0.0;
+		}		
+		else if(lightX <= 20.0 && lightX >= -20.0)
+		{
+			lightX += i % 10 + 1;
+		}
+		
+		if(lightY > 20.0 || lightY < -20.0)
+		{ 
+		    lightY = 0.0;
+		}		
+		else if(lightY <= 20.0 && lightY >= -20.0)
+		{
+			lightY += j % 10 + 1;
+		}
 	}
 	glutPostRedisplay();
 	glutTimerFunc(24, s_timerFunc, 1);

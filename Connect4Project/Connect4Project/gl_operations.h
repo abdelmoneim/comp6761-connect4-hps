@@ -35,7 +35,9 @@ class GLOperations
 	// mouse coordinates
 	static int previousX;
 	static int previousY;
-
+	static double lightX;
+	static double lightY;
+	static bool move_light;
 	static bool rotate_board;
 	static double y_rotate;
 
